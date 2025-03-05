@@ -9,26 +9,117 @@
 <body>
     <h1>Registro de Factura</h1>
     <form action="procesar_factura.php" method="post">
-        <label for="numeroFactura">Número de Factura:</label>
-        <input type="text" id="numeroFactura" name="numeroFactura" required><br><br>
+        <!-- Campos generales del CFDI -->
+        <fieldset>
+            <legend>Datos Generales del Comprobante</legend>
+            <label for="version">Versión del CFDI:</label>
+            <input type="text" id="version" name="version" value="4.0" readonly required><br><br>
 
-        <label for="fechaEmision">Fecha de Emisión:</label>
-        <input type="date" id="fechaEmision" name="fechaEmision" required><br><br>
+            <label for="fecha">Fecha y Hora de Expedición:</label>
+            <input type="datetime-local" id="fecha" name="fecha" required><br><br>
 
-        <label for="montoTotal">Monto Total:</label>
-        <input type="number" id="montoTotal" name="montoTotal" step="0.01" required><br><br>
+            <label for="tipoComprobante">Tipo de Comprobante:</label>
+            <select id="tipoComprobante" name="tipoComprobante" required>
+                <option value="I">Ingreso</option>
+                <option value="E">Egreso</option>
+                <option value="T">Traslado</option>
+                <option value="N">Nómina</option>
+                <option value="P">Pago</option>
+            </select><br><br>
 
-        <label for="descripcion">Descripción:</label>
-        <textarea id="descripcion" name="descripcion" rows="4" cols="50" required></textarea><br><br>
+            <label for="moneda">Moneda:</label>
+            <input type="text" id="moneda" name="moneda" value="MXN" readonly required><br><br>
 
-        <label for="metodoPago">Método de Pago:</label>
-        <select id="metodoPago" name="metodoPago" required>
-            <option value="efectivo">Efectivo</option>
-            <option value="tarjeta">Tarjeta</option>
-            <option value="transferencia">Transferencia</option>
-        </select><br><br>
+            <label for="subTotal">SubTotal:</label>
+            <input type="number" id="subTotal" name="subTotal" step="0.01" required><br><br>
+
+            <label for="total">Total:</label>
+            <input type="number" id="total" name="total" step="0.01" required><br><br>
+
+            <label for="lugarExpedicion">Lugar de Expedición (Código Postal):</label>
+            <input type="text" id="lugarExpedicion" name="lugarExpedicion" required><br><br>
+
+            <label for="formaPago">Forma de Pago:</label>
+            <input type="text" id="formaPago" name="formaPago" required><br><br>
+
+            <label for="metodoPago">Método de Pago:</label>
+            <input type="text" id="metodoPago" name="metodoPago" required><br><br>
+        </fieldset>
+
+        <!-- Campos de conceptos -->
+        <fieldset>
+            <legend>Conceptos</legend>
+            <div id="conceptos">
+                <div class="concepto">
+                    <label for="claveProdServ">Clave del Producto/Servicio:</label>
+                    <input type="text" name="claveProdServ[]" required><br><br>
+
+                    <label for="cantidad">Cantidad:</label>
+                    <input type="number" name="cantidad[]" step="0.01" required><br><br>
+
+                    <label for="claveUnidad">Clave de la Unidad de Medida:</label>
+                    <input type="text" name="claveUnidad[]" required><br><br>
+
+                    <label for="descripcion">Descripción:</label>
+                    <textarea name="descripcion[]" rows="2" cols="30" required></textarea><br><br>
+
+                    <label for="valorUnitario">Valor Unitario:</label>
+                    <input type="number" name="valorUnitario[]" step="0.01" required><br><br>
+
+                    <label for="importe">Importe:</label>
+                    <input type="number" name="importe[]" step="0.01" required><br><br>
+                </div>
+            </div>
+            <button type="button" id="agregarConcepto">Agregar Concepto</button>
+        </fieldset>
+
+        <!-- Campos de impuestos -->
+        <fieldset>
+            <legend>Impuestos</legend>
+            <label for="totalImpuestosTrasladados">Total de Impuestos Trasladados:</label>
+            <input type="number" id="totalImpuestosTrasladados" name="totalImpuestosTrasladados" step="0.01" required><br><br>
+
+            <label for="totalImpuestosRetenidos">Total de Impuestos Retenidos:</label>
+            <input type="number" id="totalImpuestosRetenidos" name="totalImpuestosRetenidos" step="0.01" required><br><br>
+
+            <div id="impuestos">
+                <div class="impuesto">
+                    <label for="base">Base:</label>
+                    <input type="number" name="base[]" step="0.01" required><br><br>
+
+                    <label for="impuesto">Impuesto:</label>
+                    <input type="text" name="impuesto[]" required><br><br>
+
+                    <label for="tipoFactor">Tipo de Factor:</label>
+                    <input type="text" name="tipoFactor[]" required><br><br>
+
+                    <label for="tasaOCuota">Tasa o Cuota:</label>
+                    <input type="number" name="tasaOCuota[]" step="0.01" required><br><br>
+
+                    <label for="importeImpuesto">Importe:</label>
+                    <input type="number" name="importeImpuesto[]" step="0.01" required><br><br>
+                </div>
+            </div>
+            <button type="button" id="agregarImpuesto">Agregar Impuesto</button>
+        </fieldset>
 
         <input type="submit" value="Registrar Factura">
     </form>
+
+    <script>
+        // Agregar más conceptos
+        document.getElementById("agregarConcepto").addEventListener("click", function() {
+            const conceptos = document.getElementById("conceptos");
+            const nuevoConcepto = conceptos.firstElementChild.cloneNode(true);
+            conceptos.appendChild(nuevoConcepto);
+        });
+
+        // Agregar más impuestos
+        document.getElementById("agregarImpuesto").addEventListener("click", function() {
+            const impuestos = document.getElementById("impuestos");
+            const nuevoImpuesto = impuestos.firstElementChild.cloneNode(true);
+            impuestos.appendChild(nuevoImpuesto);
+        });
+    </script>
 </body>
 </html>
