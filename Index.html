@@ -64,6 +64,10 @@
                         <button type="button" id="guardar-receptor">Guardar registro</button>
                     `;
                     form.appendChild(div);
+
+                    document.getElementById("guardar-receptor").addEventListener("click", function() {
+                        window.location.href = "compra.html";
+                    });
                 }
             });
         });
@@ -83,8 +87,84 @@
                     <ul id="resultado-busqueda" class="dropdown"></ul>
                 </label>
                 <button type="button" id="nuevo-receptor">Registrar un nuevo receptor</button>
+                <button type="button" id="continuar" style="display:none;">Continuar</button>
             </form>
         </section>
     </main>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const receptores = [
+                "Juan Pérez",
+                "María Gómez",
+                "Carlos Rodríguez",
+                "Ana Fernández",
+                "Luis Martínez",
+                "Sofía Ramírez",
+                "Pedro Torres",
+                "Gabriela Hernández",
+                "Miguel López",
+                "Laura Sánchez"
+            ];
+
+            const buscarReceptor = document.getElementById("buscar-receptor");
+            const resultadoBusqueda = document.getElementById("resultado-busqueda");
+            const continuarBtn = document.getElementById("continuar");
+            
+            buscarReceptor.addEventListener("input", function() {
+                const filtro = buscarReceptor.value.toLowerCase();
+                resultadoBusqueda.innerHTML = "";
+                
+                if (filtro) {
+                    const resultados = receptores.filter(receptor => receptor.toLowerCase().includes(filtro));
+                    resultados.forEach(receptor => {
+                        let li = document.createElement("li");
+                        li.textContent = receptor;
+                        li.addEventListener("click", function() {
+                            buscarReceptor.value = receptor;
+                            resultadoBusqueda.innerHTML = "";
+                            continuarBtn.style.display = "block";
+                        });
+                        resultadoBusqueda.appendChild(li);
+                    });
+                } else {
+                    continuarBtn.style.display = "none";
+                }
+            });
+
+            continuarBtn.addEventListener("click", function() {
+                window.location.href = "compra.html";
+            });
+            
+            document.getElementById("nuevo-receptor").addEventListener("click", function() {
+                let form = document.getElementById("form-receptor");
+                let camposExtra = document.getElementById("campos-nuevo-receptor");
+                
+                if (!camposExtra) {
+                    let div = document.createElement("div");
+                    div.id = "campos-nuevo-receptor";
+                    div.innerHTML = `
+                        <h3>Registrar Nuevo Receptor</h3>
+                        <label>RFC: <input type="text" name="rfc-receptor"></label>
+                        <label>Nombre: <input type="text" name="nombre-receptor"></label>
+                        <label>Uso CFDI: <input type="text" name="uso-cfdi"></label>
+                        <h3>Dirección</h3>
+                        <label>Calle: <input type="text" name="calle"></label>
+                        <label>Número Exterior: <input type="text" name="num-exterior"></label>
+                        <label>Número Interior: <input type="text" name="num-interior"></label>
+                        <label>Colonia: <input type="text" name="colonia"></label>
+                        <label>Municipio: <input type="text" name="municipio"></label>
+                        <label>Estado: <input type="text" name="estado"></label>
+                        <label>Código Postal: <input type="text" name="cp-receptor"></label>
+                        <button type="button" id="guardar-receptor">Guardar registro</button>
+                    `;
+                    form.appendChild(div);
+
+                    document.getElementById("guardar-receptor").addEventListener("click", function() {
+                        window.location.href = "compra.html";
+                    });
+                }
+            });
+        });
+    </script>
 </body>
 </html>
