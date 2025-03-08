@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resumen de Factura</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        .resumen {
+            border: 1px solid #ccc;
+            padding: 20px;
+            margin-top: 20px;
+            background-color: #f9f9f9;
+        }
+        .resumen h2 {
+            margin-top: 0;
+        }
+        .resumen p {
+            margin: 5px 0;
+        }
+        .resumen ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .resumen ul li {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Resumen de Factura</h1>
+    <div class="resumen" id="resumenFactura">
+        <!-- Los datos se cargarán aquí con JavaScript -->
+    </div>
+
+    <a href="compra.html">Regresar al formulario</a>
+
+    <script>
+        // Datos dummy adicionales
+        const datosDummy = {
+            version: "4.0",
+            tipoComprobante: "Ingreso",
+            emisor: {
+                nombre: "Tech Solutions S.A. de C.V.",
+                rfc: "TECH123456XYZ",
+                regimenFiscal: "601 - General de Ley Personas Morales",
+                domicilio: "Av. Tecnológico #123, Ciudad de México",
+            },
+            receptor: {
+                nombre: "Cliente Ejemplo S.A. de C.V.",
+                rfc: "CEXP987654ABC",
+                usoCFDI: "G03 - Gastos en general",
+                domicilio: "Calle Falsa #123, Ciudad de México",
+            },
+        };
+
+        // Recuperar los datos de localStorage
+        const datos = JSON.parse(localStorage.getItem("facturaData"));
+
+        if (datos) {
+            const resumen = document.getElementById("resumenFactura");
+
+            // Mostrar los datos generales
+            resumen.innerHTML = `
+                <h2>Datos Generales del Comprobante</h2>
+                <p><strong>Versión:</strong> ${datosDummy.version}</p>
+                <p><strong>Tipo de Comprobante:</strong> ${datosDummy.tipoComprobante}</p>
+                <p><strong>Fecha y Hora de Expedición:</strong> ${datos.fecha}</p>
+                <p><strong>Forma de Pago:</strong> ${datos.formaPago}</p>
+                <p><strong>Método de Pago:</strong> ${datos.metodoPago}</p>
+
+                <h2>Datos del Emisor</h2>
+                <p><strong>Nombre:</strong> ${datosDummy.emisor.nombre}</p>
+                <p><strong>RFC:</strong> ${datosDummy.emisor.rfc}</p>
+                <p><strong>Régimen Fiscal:</strong> ${datosDummy.emisor.regimenFiscal}</p>
+                <p><strong>Domicilio:</strong> ${datosDummy.emisor.domicilio}</p>
+
+                <h2>Datos del Receptor</h2>
+                <p><strong>Nombre:</strong> ${datosDummy.receptor.nombre}</p>
+                <p><strong>RFC:</strong> ${datosDummy.receptor.rfc}</p>
+                <p><strong>Uso CFDI:</strong> ${datosDummy.receptor.usoCFDI}</p>
+                <p><strong>Domicilio:</strong> ${datosDummy.receptor.domicilio}</p>
+
+                <h2>Conceptos</h2>
+                <ul>
+                    ${datos.conceptos.map(concepto => `
+                        <li>
+                            <strong>Clave del Producto/Servicio:</strong> ${concepto.claveProdServ}<br>
+                            <strong>Cantidad:</strong> ${concepto.cantidad}<br>
+                            <strong>Unidad de Medida:</strong> ${concepto.claveUnidad}<br>
+                            <strong>Descripción:</strong> ${concepto.descripcion}<br>
+                            <strong>Valor Unitario:</strong> $${parseFloat(concepto.valorUnitario).toFixed(2)}<br>
+                            <strong>Importe:</strong> $${parseFloat(concepto.importe).toFixed(2)}
+                        </li>
+                    `).join("")}
+                </ul>
+
+                <h2>Totales</h2>
+                <p><strong>Subtotal:</strong> $${parseFloat(datos.subtotal).toFixed(2)}</p>
+                <p><strong>IVA (16%):</strong> $${parseFloat(datos.iva).toFixed(2)}</p>
+                <p><strong>Total:</strong> $${parseFloat(datos.total).toFixed(2)}</p>
+            `;
+        } else {
+            // Si no hay datos, mostrar un mensaje
+            resumen.innerHTML = "<p>No hay datos para mostrar.</p>";
+        }
+    </script>
+</body>
+</html>

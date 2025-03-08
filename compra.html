@@ -1,3 +1,5 @@
+<!-- compra.html -->
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -8,7 +10,7 @@
 </head>
 <body>
     <h1>Registro de Factura</h1>
-    <form action="procesar_factura.php" method="post">
+    <form id="facturaForm">
         <!-- Campos generales del CFDI -->
         <fieldset>
             <legend>Datos Generales del Comprobante</legend>
@@ -35,8 +37,6 @@
             </select><br><br>
         </fieldset>
 
-
-        
         <!-- Campos de conceptos -->
         <fieldset>
             <legend>Conceptos</legend>
@@ -72,37 +72,20 @@
             <button type="button" id="agregarConcepto">Agregar Concepto</button>
         </fieldset>
 
-        <!-- Campos de impuestos -->
+        <!-- Campos de Subtotal, IVA y Total -->
         <fieldset>
-            <legend>Impuestos</legend>
-            <label for="totalImpuestosTrasladados">Total de Impuestos Trasladados:</label>
-            <input type="number" id="totalImpuestosTrasladados" name="totalImpuestosTrasladados" step="0.01" required><br><br>
+            <legend>Totales</legend>
+            <label for="subtotal">Subtotal:</label>
+            <input type="number" id="subtotal" name="subtotal" step="0.01" readonly required><br><br>
 
-            <label for="totalImpuestosRetenidos">Total de Impuestos Retenidos:</label>
-            <input type="number" id="totalImpuestosRetenidos" name="totalImpuestosRetenidos" step="0.01" required><br><br>
+            <label for="iva">IVA (16%):</label>
+            <input type="number" id="iva" name="iva" step="0.01" readonly required><br><br>
 
-            <div id="impuestos">
-                <div class="impuesto">
-                    <label for="base">Base:</label>
-                    <input type="number" name="base[]" step="0.01" required><br><br>
-
-                    <label for="impuesto">Impuesto:</label>
-                    <input type="text" name="impuesto[]" required><br><br>
-
-                    <label for="tipoFactor">Tipo de Factor:</label>
-                    <input type="text" name="tipoFactor[]" required><br><br>
-
-                    <label for="tasaOCuota">Tasa o Cuota:</label>
-                    <input type="number" name="tasaOCuota[]" step="0.01" required><br><br>
-
-                    <label for="importeImpuesto">Importe:</label>
-                    <input type="number" name="importeImpuesto[]" step="0.01" required><br><br>
-                </div>
-            </div>
-            <button type="button" id="agregarImpuesto">Agregar Impuesto</button>
+            <label for="total">Total:</label>
+            <input type="number" id="total" name="total" step="0.01" readonly required><br><br>
         </fieldset>
 
-        <input type="submit" value="Registrar Factura">
+        <button type="submit">Registrar Factura</button>
     </form>
 
     <div>
@@ -118,9 +101,8 @@
             <li>Subtotal: Se calcula de acuerdo a los conceptos</li>
             <li>Total: Se calcular en base el Subtotal</li>
         </ul>
-            
-
     </div>
+
     <script>
         // Establecer la fecha y hora actual en el campo de fecha
         function setCurrentDateTime() {
@@ -204,21 +186,71 @@
             const valorUnitario = parseFloat(concepto.querySelector('.valorUnitario').value);
             const importe = cantidad * valorUnitario;
             concepto.querySelector('.importe').value = importe.toFixed(2);
+
+            // Calcular el subtotal, IVA y total
+            calcularTotales();
         }
 
-            // Agregar más conceptos
-            document.getElementById("agregarConcepto").addEventListener("click", function() {
-                const conceptos = document.getElementById("conceptos");
-                const nuevoConcepto = conceptos.firstElementChild.cloneNode(true);
-                conceptos.appendChild(nuevoConcepto);
+        // Función para calcular el subtotal, IVA y total
+        function calcularTotales() {
+            const conceptos = document.querySelectorAll('.concepto');
+            let subtotal = 0;
+
+            conceptos.forEach(concepto => {
+                const importe = parseFloat(concepto.querySelector('.importe').value);
+                if (!isNaN(importe)) {
+                    subtotal += importe;
+                }
             });
 
-            // Agregar más impuestos
-            document.getElementById("agregarImpuesto").addEventListener("click", function() {
-                const impuestos = document.getElementById("impuestos");
-                const nuevoImpuesto = impuestos.firstElementChild.cloneNode(true);
-                impuestos.appendChild(nuevoImpuesto);
+            const iva = subtotal * 0.16;
+            const total = subtotal + iva;
+
+            document.getElementById('subtotal').value = subtotal.toFixed(2);
+            document.getElementById('iva').value = iva.toFixed(2);
+            document.getElementById('total').value = total.toFixed(2);
+        }
+
+        // Agregar más conceptos
+        document.getElementById("agregarConcepto").addEventListener("click", function() {
+            const conceptos = document.getElementById("conceptos");
+            const nuevoConcepto = conceptos.firstElementChild.cloneNode(true);
+            conceptos.appendChild(nuevoConcepto);
+        });
+
+        // Manejar el envío del formulario
+        document.getElementById("facturaForm").addEventListener("submit", function(event) {
+            event.preventDefault(); // Evitar el envío del formulario
+
+            // Recopilar los datos del formulario
+            const datos = {
+                fecha: document.getElementById("fecha").value,
+                formaPago: document.getElementById("formaPago").value,
+                metodoPago: document.getElementById("metodoPago").value,
+                conceptos: [],
+                subtotal: document.getElementById("subtotal").value,
+                iva: document.getElementById("iva").value,
+                total: document.getElementById("total").value,
+            };
+
+            // Recopilar los conceptos
+            document.querySelectorAll(".concepto").forEach(concepto => {
+                datos.conceptos.push({
+                    claveProdServ: concepto.querySelector(".claveProdServ").value,
+                    cantidad: concepto.querySelector(".cantidad").value,
+                    claveUnidad: concepto.querySelector(".claveUnidad").value,
+                    descripcion: concepto.querySelector("textarea").value,
+                    valorUnitario: concepto.querySelector(".valorUnitario").value,
+                    importe: concepto.querySelector(".importe").value,
+                });
             });
+
+            // Almacenar los datos en localStorage
+            localStorage.setItem("facturaData", JSON.stringify(datos));
+
+            // Redirigir a resumen.html
+            window.location.href = "resumen.html";
+        });
     </script>
 </body>
 </html>
