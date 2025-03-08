@@ -12,62 +12,61 @@
         <!-- Campos generales del CFDI -->
         <fieldset>
             <legend>Datos Generales del Comprobante</legend>
-            <label for="version">Versión del CFDI:</label>
-            <input type="text" id="version" name="version" value="4.0" readonly required><br><br>
-
             <label for="fecha">Fecha y Hora de Expedición:</label>
             <input type="datetime-local" id="fecha" name="fecha" required><br><br>
 
-            <label for="tipoComprobante">Tipo de Comprobante:</label>
-            <select id="tipoComprobante" name="tipoComprobante" required>
-                <option value="I">Ingreso</option>
-                <option value="E">Egreso</option>
-                <option value="T">Traslado</option>
-                <option value="N">Nómina</option>
-                <option value="P">Pago</option>
+            <!-- Campo de Forma de Pago -->
+            <label for="formaPago">Forma de Pago:</label>
+            <select id="formaPago" name="formaPago" required>
+                <option value="01">Efectivo</option>
+                <option value="02">Cheque nominativo</option>
+                <option value="03">Transferencia electrónica de fondos</option>
+                <option value="04">Tarjeta de crédito</option>
+                <option value="05">Monedero electrónico</option>
+                <option value="28">Tarjeta de débito</option>
+                <option value="99">Por definir</option>
             </select><br><br>
 
-            <label for="moneda">Moneda:</label>
-            <input type="text" id="moneda" name="moneda" value="MXN" readonly required><br><br>
-
-            <label for="subTotal">SubTotal:</label>
-            <input type="number" id="subTotal" name="subTotal" step="0.01" required><br><br>
-
-            <label for="total">Total:</label>
-            <input type="number" id="total" name="total" step="0.01" required><br><br>
-
-            <label for="lugarExpedicion">Lugar de Expedición (Código Postal):</label>
-            <input type="text" id="lugarExpedicion" name="lugarExpedicion" required><br><br>
-
-            <label for="formaPago">Forma de Pago:</label>
-            <input type="text" id="formaPago" name="formaPago" required><br><br>
-
+            <!-- Campo de Método de Pago -->
             <label for="metodoPago">Método de Pago:</label>
-            <input type="text" id="metodoPago" name="metodoPago" required><br><br>
+            <select id="metodoPago" name="metodoPago" required>
+                <option value="PUE">Pago en una sola exhibición</option>
+                <option value="PPD">Pago en parcialidades o diferido</option>
+            </select><br><br>
         </fieldset>
 
+
+        
         <!-- Campos de conceptos -->
         <fieldset>
             <legend>Conceptos</legend>
             <div id="conceptos">
                 <div class="concepto">
                     <label for="claveProdServ">Clave del Producto/Servicio:</label>
-                    <input type="text" name="claveProdServ[]" required><br><br>
+                    <select name="claveProdServ[]" class="claveProdServ" required onchange="actualizarUnidadMedida(this)">
+                        <option value="80111900">Diseño y desarrollo de páginas web</option>
+                        <option value="80111500">Diseño gráfico</option>
+                    </select><br><br>
 
                     <label for="cantidad">Cantidad:</label>
-                    <input type="number" name="cantidad[]" step="0.01" required><br><br>
+                    <input type="number" name="cantidad[]" class="cantidad" step="1" min="1" value="1" required oninput="calcularImporte(this)"><br><br>
 
-                    <label for="claveUnidad">Clave de la Unidad de Medida:</label>
-                    <input type="text" name="claveUnidad[]" required><br><br>
+                    <label for="claveUnidad">Unidad de medida:</label>
+                    <select name="claveUnidad[]" class="claveUnidad" required disabled onchange="actualizarValorUnitario(this)">
+                        <option value="">-- Seleccione --</option>
+                    </select><br><br>
 
                     <label for="descripcion">Descripción:</label>
                     <textarea name="descripcion[]" rows="2" cols="30" required></textarea><br><br>
 
                     <label for="valorUnitario">Valor Unitario:</label>
-                    <input type="number" name="valorUnitario[]" step="0.01" required><br><br>
+                    <input type="number" name="valorUnitario[]" class="valorUnitario" step="0.01" readonly required><br><br>
 
                     <label for="importe">Importe:</label>
-                    <input type="number" name="importe[]" step="0.01" required><br><br>
+                    <input type="number" name="importe[]" class="importe" step="0.01" readonly required><br><br>
+
+                    <label for="moneda">Moneda:</label>
+                    <input type="text" id="moneda" name="moneda" value="MXN" readonly required><br><br>
                 </div>
             </div>
             <button type="button" id="agregarConcepto">Agregar Concepto</button>
@@ -106,20 +105,120 @@
         <input type="submit" value="Registrar Factura">
     </form>
 
-    <script>
-        // Agregar más conceptos
-        document.getElementById("agregarConcepto").addEventListener("click", function() {
-            const conceptos = document.getElementById("conceptos");
-            const nuevoConcepto = conceptos.firstElementChild.cloneNode(true);
-            conceptos.appendChild(nuevoConcepto);
-        });
+    <div>
+        <p>Datos para la base de datos </p>
+        <ul>
+            <li>Versión 4.0</li>
+            <li>Tipo de comprobante: Ingreso</li>
+        </ul>
+        <p>Datos para la siguiente pantalla:</p>
+        <ul>
+            <li>Datos del emisor</li>
+            <li>Lugar de expedición</li>
+            <li>Subtotal: Se calcula de acuerdo a los conceptos</li>
+            <li>Total: Se calcular en base el Subtotal</li>
+        </ul>
+            
 
-        // Agregar más impuestos
-        document.getElementById("agregarImpuesto").addEventListener("click", function() {
-            const impuestos = document.getElementById("impuestos");
-            const nuevoImpuesto = impuestos.firstElementChild.cloneNode(true);
-            impuestos.appendChild(nuevoImpuesto);
-        });
+    </div>
+    <script>
+        // Establecer la fecha y hora actual en el campo de fecha
+        function setCurrentDateTime() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0'); // Los meses van de 0 a 11
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const currentDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+            document.getElementById('fecha').value = currentDateTime;
+        }
+
+        // Llamar a la función al cargar la página
+        window.onload = setCurrentDateTime;
+
+        // Función para actualizar la unidad de medida
+        function actualizarUnidadMedida(select) {
+            const concepto = select.closest('.concepto');
+            const claveUnidad = concepto.querySelector('.claveUnidad');
+
+            // Limpiar opciones anteriores
+            claveUnidad.innerHTML = '<option value="">-- Seleccione --</option>';
+
+            if (select.value === "80111900") {
+                // Opciones para "Diseño y desarrollo de páginas web"
+                claveUnidad.disabled = false;
+                claveUnidad.innerHTML += `
+                    <option value="Landing Page">Landing Page</option>
+                    <option value="E-Shop">E-Shop</option>
+                `;
+            } else if (select.value === "80111500") {
+                // Opciones para "Diseño gráfico"
+                claveUnidad.disabled = false;
+                claveUnidad.innerHTML += `
+                    <option value="Logo">Logo</option>
+                    <option value="Diseño de marca">Diseño de marca</option>
+                `;
+            } else {
+                // Deshabilitar y limpiar si no hay selección válida
+                claveUnidad.disabled = true;
+                claveUnidad.value = "";
+            }
+
+            // Limpiar valor unitario e importe al cambiar la clave del producto
+            concepto.querySelector('.valorUnitario').value = "";
+            concepto.querySelector('.importe').value = "";
+        }
+
+        // Función para actualizar el valor unitario según la unidad de medida
+        function actualizarValorUnitario(select) {
+            const concepto = select.closest('.concepto');
+            const valorUnitario = concepto.querySelector('.valorUnitario');
+
+            switch (select.value) {
+                case "Landing Page":
+                    valorUnitario.value = "4000";
+                    break;
+                case "E-Shop":
+                    valorUnitario.value = "14000";
+                    break;
+                case "Logo":
+                    valorUnitario.value = "3000";
+                    break;
+                case "Diseño de marca":
+                    valorUnitario.value = "5000";
+                    break;
+                default:
+                    valorUnitario.value = "";
+                    break;
+            }
+
+            // Calcular el importe automáticamente
+            calcularImporte(select);
+        }
+
+        // Función para calcular el importe
+        function calcularImporte(input) {
+            const concepto = input.closest('.concepto');
+            const cantidad = parseFloat(concepto.querySelector('.cantidad').value);
+            const valorUnitario = parseFloat(concepto.querySelector('.valorUnitario').value);
+            const importe = cantidad * valorUnitario;
+            concepto.querySelector('.importe').value = importe.toFixed(2);
+        }
+
+            // Agregar más conceptos
+            document.getElementById("agregarConcepto").addEventListener("click", function() {
+                const conceptos = document.getElementById("conceptos");
+                const nuevoConcepto = conceptos.firstElementChild.cloneNode(true);
+                conceptos.appendChild(nuevoConcepto);
+            });
+
+            // Agregar más impuestos
+            document.getElementById("agregarImpuesto").addEventListener("click", function() {
+                const impuestos = document.getElementById("impuestos");
+                const nuevoImpuesto = impuestos.firstElementChild.cloneNode(true);
+                impuestos.appendChild(nuevoImpuesto);
+            });
     </script>
 </body>
 </html>
