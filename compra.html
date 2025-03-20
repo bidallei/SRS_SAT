@@ -54,6 +54,10 @@
                     <label for="claveUnidad">Unidad de medida:</label>
                     <select name="claveUnidad[]" class="claveUnidad" required disabled onchange="actualizarValorUnitario(this)">
                         <option value="">-- Seleccione --</option>
+                        <!-- Opciones de unidades de medida del SAT -->
+                        <option value="E48">Unidad de servicio (E48)</option>
+                        <option value="H87">Pieza (H87)</option>
+                        <option value="ACT">Actividad (ACT)</option>
                     </select><br><br>
 
                     <label for="descripcion">Descripción:</label>
@@ -109,51 +113,29 @@
             const concepto = select.closest('.concepto');
             const claveUnidad = concepto.querySelector('.claveUnidad');
 
-            // Limpiar opciones anteriores
-            claveUnidad.innerHTML = '<option value="">-- Seleccione --</option>';
-
-            if (select.value === "80111900") {
-                // Opciones para "Diseño y desarrollo de páginas web"
-                claveUnidad.disabled = false;
-                claveUnidad.innerHTML += `
-                    <option value="Landing Page">Landing Page</option>
-                    <option value="E-Shop">E-Shop</option>
-                `;
-            } else if (select.value === "80111500") {
-                // Opciones para "Diseño gráfico"
-                claveUnidad.disabled = false;
-                claveUnidad.innerHTML += `
-                    <option value="Logo">Logo</option>
-                    <option value="Diseño de marca">Diseño de marca</option>
-                `;
-            } else {
-                // Deshabilitar y limpiar si no hay selección válida
-                claveUnidad.disabled = true;
-                claveUnidad.value = "";
-            }
+            // Habilitar el campo de unidad de medida
+            claveUnidad.disabled = false;
 
             // Limpiar valor unitario e importe al cambiar la clave del producto
             concepto.querySelector('.valorUnitario').value = "";
             concepto.querySelector('.importe').value = "";
+
+            // Actualizar el valor unitario según la clave del producto/servicio
+            actualizarValorUnitario(claveUnidad);
         }
 
-        // Función para actualizar el valor unitario según la unidad de medida
+        // Función para actualizar el valor unitario según la clave del producto/servicio
         function actualizarValorUnitario(select) {
             const concepto = select.closest('.concepto');
             const valorUnitario = concepto.querySelector('.valorUnitario');
+            const claveProdServ = concepto.querySelector('.claveProdServ').value;
 
-            switch (select.value) {
-                case "Landing Page":
-                    valorUnitario.value = "4000";
+            switch (claveProdServ) {
+                case "80111900": // Diseño y desarrollo de páginas web
+                    valorUnitario.value = "4000"; // Valor fijo para este servicio
                     break;
-                case "E-Shop":
-                    valorUnitario.value = "14000";
-                    break;
-                case "Logo":
-                    valorUnitario.value = "3000";
-                    break;
-                case "Diseño de marca":
-                    valorUnitario.value = "5000";
+                case "80111500": // Diseño gráfico
+                    valorUnitario.value = "3000"; // Valor fijo para este servicio
                     break;
                 default:
                     valorUnitario.value = "";
